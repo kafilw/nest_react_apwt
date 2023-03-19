@@ -10,3 +10,8 @@ FROM mcr.microsoft.com/devcontainers/javascript-node:0-18
 
 # [Optional] Uncomment if you want to install more global node modules
 # RUN su node -c "npm install -g <your-package-list-here>"
+
+
+
+
+# npm install -g @nestjs/common express-session http @nestjs/platform-express multer express @nestjs/typeorm @nestjs-modules/mailer class-validator class-transformer bcrypt rxjs @nestjs/core
