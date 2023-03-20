@@ -14,7 +14,7 @@
 	// "forwardPorts": [3000, 5432],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "npm install -g @nestjs/common express-session http @nestjs/platform-express multer express @nestjs/typeorm @nestjs-modules/mailer class-validator class-transformer bcrypt rxjs @nestjs/core"
+	"postCreateCommand": "npm install -g @nestjs/common express-session http @nestjs/platform-express multer express @nestjs/typeorm @nestjs-modules/mailer class-validator class-transformer bcrypt rxjs @nestjs/core @nestjs/cli"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
