@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from 'typeorm'
 import { User } from "./adminentity.entity"
@@ -6,6 +6,7 @@ import { Transform } from "class-transformer"
 import { AdminForm } from "./adminform.dto";
 import { MailerService } from "@nestjs-modules/mailer";
 import * as bcrypt from 'bcrypt';
+import { ILike } from "typeorm";
 
 
 
@@ -33,10 +34,44 @@ export class AdminService {
         //return "the id is "+id;
     }
 
-    blockUser(id):any {
-        return this.usersRepository.update(id, {isblocked: true})
-        //return "the id "+ id + " is blocked";
+    //getUserByName(qry):any {
+        
+        //return this.usersRepository.findOneBy(qry.name)
+    //}
+
+    async searchByName(name: string): Promise<User[]> {
+        return this.usersRepository.find({
+          where: {
+            name: ILike("%" + name + "%"), // case-insensitive search
+              
+          },
+        });
+      }
+
+    //create a function that gets the user by provided id, takes in the new data and updates the user
+    updateUser(id, mydto: AdminForm):any {
+        return this.usersRepository.update(id, mydto)
+        //return "the id "+ id + " is updated";
     }
+
+
+    blockUser(id: any): any {
+        this.usersRepository.findOne({ where: { id } })
+          .then(user => {
+            if (user) {
+              const isBlocked = !user.isblocked;
+              console.log("The id " + id + " is " + (isBlocked ? "blocked" : "unblocked"));
+              return this.usersRepository.update(id, { isblocked: isBlocked });
+            }
+            return null;
+          })
+          .catch(error => {
+            console.log(error);
+            return null;
+          });
+      }
+      
+      
 
     addNewUser(mydto: AdminForm):any {
         const useracc = new User()
@@ -82,50 +117,31 @@ export class AdminService {
         const salt = await bcrypt.genSalt();
         const hashedPass = await bcrypt.hash(mydto.password, salt);
         mydto.password = hashedPass;
+        mydto.isblocked = false;
         return this.usersRepository.save(mydto);
     }
 
     async signin(mydto){
-        console.log("Password: " + mydto.password);
+        let authenticated = false;
+        //console.log("Password: " + mydto.password);
         const mydata= await this.usersRepository.findOneBy({email: mydto.email});
         if(mydata) {
             const match = await bcrypt.compare(mydto.password, mydata.password);
             if(match) {
                 console.log("Success")
-                return true;
+                authenticated = true;
+                return authenticated;
             }
             else {
                 console.log("Invalid Creds")
-                return false;
+                return authenticated;
             }
         }
         else {
             console.log("User not found");
             return 0;
-        }
-        // console.log(mydata.password);
-        // const isMatch= await bcrypt.compare(mydto.password, mydata.password);
-        // if(isMatch) {
-        //     return 1;
-        // }
-        // else {
-        //     return 0;
-        // }
-        
+        }        
     }
-
-    // async signin(mydto) {
-    //     console.log(mydto.password);
-    //     const salt = await bcrypt.genSalt();
-    //     const mydata = await this.usersRepository.findOneBy({email: mydto.email});
-    //     const hash = await bcrypt.hash(mydto.password, salt)
-    //     const isMatch = await bcrypt.compare(hash, mydata.password);
-    //     if(isMatch) {
-    //         return 1;
-    //     }
-    //     else {
-    //         return 0;
-    //     }
-    // }
+    
 
 }

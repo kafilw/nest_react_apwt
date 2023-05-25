@@ -2,8 +2,9 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, S
 import { Req } from "@nestjs/common";
 import { AdminForm } from "./adminform.dto";
 import { AdminService } from "./adminservice.service";
-import * as session from 'express-session'
-import { request } from "http";
+import { User } from "./adminentity.entity";
+//import * as session from 'express-session'
+//import { request } from "http";
 
 
 
@@ -27,6 +28,14 @@ export class AdminController
       return this.adminService.getUserByID(id);
     }
 
+    @Get("/finduserbyname/")
+    async searchByName(@Query('name') name: string): Promise<User[]> {
+        return this.adminService.searchByName(name);
+      }
+    // getUserByName(@Query() name): any {
+    //     return this.adminService.getUserByName(name);
+    // }
+
     @Post("/setprice/")
     setPrice(
         @Body("price") price:number,
@@ -37,6 +46,14 @@ export class AdminController
     @Delete("/deleteuser/")
     deleteUser(@Query() qry:any): any {
         return this.adminService.deleteUser(qry);
+    }
+
+    @Put("/updateuser/")
+    updateUser(
+        @Body("id") id:number,
+        @Body() mydto: AdminForm
+    ):any {
+        return this.adminService.updateUser(id, mydto);
     }
 
     @Put("/blockuser/")
@@ -81,15 +98,15 @@ export class AdminController
         return this.adminService.signup(mydto);
     }
 
-    @Get('/signin')
+    @Post('/signin')
     async signin(@Session() session, @Body() mydto:AdminForm) {
         if (await this.adminService.signin(mydto)) {
-            session.email = mydto.email;
-            console.log("Email: " + session.email);
-            return {message: "Logged in!"};
+            //session.email = mydto.email;
+            //console.log("Email: " + session.email);
+            return {authenticated: true};
         }
         else {
-            return {message: "Invalid Credentials"};
+            return {authenticated: false};
         }
     }
 
@@ -103,6 +120,8 @@ export class AdminController
             throw new UnauthorizedException("Invalid Action!");
         }
     }
+
+    
     
 
 }
